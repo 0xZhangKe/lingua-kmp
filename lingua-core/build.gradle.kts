@@ -1,8 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.compose)
-    alias(libs.plugins.jetbrains.compose.compiler)
     alias(libs.plugins.publish)
 }
 
@@ -14,11 +12,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.ui)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.ui.tooling.preview)
-            implementation(libs.compose.markdown)
             api(libs.kotlinx.coroutines.core)
         }
         commonTest.dependencies {
@@ -27,12 +20,8 @@ kotlin {
     }
 }
 
-dependencies {
-    debugImplementation(libs.compose.ui.tooling)
-}
-
 android {
-    namespace = "com.zhangke.compose.agent.render"
+    namespace = "com.zhangke.lingua"
     compileSdk {
         version = release(37) {
             minorApiLevel = 0

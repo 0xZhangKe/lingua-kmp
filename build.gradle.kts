@@ -7,14 +7,12 @@ plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.jetbrains.compose) apply false
-    alias(libs.plugins.jetbrains.compose.compiler) apply false
     alias(libs.plugins.publish) apply false
 }
 
 allprojects {
     group = "io.github.0xzhangke"
-    version = "0.2.6"
+    version = "0.0.1"
 
     plugins.withId("com.vanniktech.maven.publish.base") {
         extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
@@ -35,9 +33,9 @@ allprojects {
                 }
             }
             pom {
-                name.set("Compose Agent Render")
-                description.set("Compose Multiplatform renderer for agent output streams.")
-                url.set("https://github.com/0xZhangKe/compose-agent-render")
+                name.set("lingua-kmp")
+                description.set("Kotlin Multiplatform library for lingua-rs")
+                url.set("https://github.com/0xZhangKe/lingua-kmp")
                 licenses {
                     license {
                         name.set("Apache 2.0")
@@ -53,9 +51,9 @@ allprojects {
                     }
                 }
                 scm {
-                    url.set("https://github.com/0xZhangKe/compose-agent-render")
-                    connection.set("scm:git:git://github.com:0xZhangKe/compose-agent-render.git")
-                    developerConnection.set("scm:git:git://github.com:0xZhangKe/compose-agent-render.git")
+                    url.set("https://github.com/0xZhangKe/lingua-kmp")
+                    connection.set("scm:git:git://github.com:0xZhangKe/lingua-kmp.git")
+                    developerConnection.set("scm:git:git://github.com:0xZhangKe/lingua-kmp.git")
                 }
             }
         }

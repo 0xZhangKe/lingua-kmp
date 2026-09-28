@@ -16,8 +16,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "compose-agent-render"
+rootProject.name = "lingua-kmp"
 
-include(":agent-render")
-include(":agent-render-koog")
-include(":demo")
+include(":lingua-core")
