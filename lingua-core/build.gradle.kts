@@ -9,6 +9,10 @@ kotlin {
         namespace = "com.zhangke.lingua"
         compileSdk = 37
         minSdk = 23
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.files.add(file("consumer-rules.pro"))
+        }
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
@@ -32,10 +36,22 @@ val buildRustAndroid by tasks.registering(Exec::class) {
         "src/androidMain/jniLibs",
     )
 
+    val cargoHome = providers.environmentVariable("CARGO_HOME")
+        .orElse(
+            providers.provider {
+                "${System.getProperty("user.home")}/.cargo"
+            },
+        )
+
+    val cargo = cargoHome.map {
+        file("$it/bin/cargo").absolutePath
+    }
+
     workingDir(rootProject.file("native"))
 
-    commandLine(
-        "cargo",
+    executable = cargo.get()
+
+    args(
         "ndk",
         "-t",
         "arm64-v8a",
@@ -45,6 +61,7 @@ val buildRustAndroid by tasks.registering(Exec::class) {
         outputDir.absolutePath,
         "build",
         "--release",
+        "--locked",
     )
 
     inputs.dir(rootProject.file("native/src"))
@@ -69,4 +86,19 @@ tasks.named("clean") {
             "src/androidMain/jniLibs",
         )
     }
+}
+
+// A Command Line Tools-only macOS host can compile KLIBs but cannot link/run iOS tests.
+// Keep common tests running on Desktop and enable the iOS run whenever its SDK is installed.
+val hasIosSimulatorSdk = providers.provider {
+    System.getProperty("os.name").contains("Mac", ignoreCase = true) &&
+        providers.exec {
+            commandLine("/usr/bin/xcrun", "--sdk", "iphonesimulator", "--show-sdk-path")
+            isIgnoreExitValue = true
+        }.result.get().exitValue == 0
+}
+tasks.matching {
+    it.name == "linkDebugTestIosSimulatorArm64" || it.name == "iosSimulatorArm64Test"
+}.configureEach {
+    onlyIf("An iOS Simulator SDK is installed") { hasIosSimulatorSdk.get() }
 }

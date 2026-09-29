@@ -1,0 +1,604 @@
+[
+  {
+    "name": "Afrikaans",
+    "iso1": "af",
+    "iso3": "afr",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Albanian",
+    "iso1": "sq",
+    "iso3": "sqi",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Arabic",
+    "iso1": "ar",
+    "iso3": "ara",
+    "scripts": [
+      "Arabic"
+    ]
+  },
+  {
+    "name": "Armenian",
+    "iso1": "hy",
+    "iso3": "hye",
+    "scripts": [
+      "Armenian"
+    ]
+  },
+  {
+    "name": "Azerbaijani",
+    "iso1": "az",
+    "iso3": "aze",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Basque",
+    "iso1": "eu",
+    "iso3": "eus",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Belarusian",
+    "iso1": "be",
+    "iso3": "bel",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Bengali",
+    "iso1": "bn",
+    "iso3": "ben",
+    "scripts": [
+      "Bengali"
+    ]
+  },
+  {
+    "name": "Bokmal",
+    "iso1": "nb",
+    "iso3": "nob",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Bosnian",
+    "iso1": "bs",
+    "iso3": "bos",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Bulgarian",
+    "iso1": "bg",
+    "iso3": "bul",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Catalan",
+    "iso1": "ca",
+    "iso3": "cat",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Chinese",
+    "iso1": "zh",
+    "iso3": "zho",
+    "scripts": [
+      "Han"
+    ]
+  },
+  {
+    "name": "Croatian",
+    "iso1": "hr",
+    "iso3": "hrv",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Czech",
+    "iso1": "cs",
+    "iso3": "ces",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Danish",
+    "iso1": "da",
+    "iso3": "dan",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Dutch",
+    "iso1": "nl",
+    "iso3": "nld",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "English",
+    "iso1": "en",
+    "iso3": "eng",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Esperanto",
+    "iso1": "eo",
+    "iso3": "epo",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Estonian",
+    "iso1": "et",
+    "iso3": "est",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Finnish",
+    "iso1": "fi",
+    "iso3": "fin",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "French",
+    "iso1": "fr",
+    "iso3": "fra",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Ganda",
+    "iso1": "lg",
+    "iso3": "lug",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Georgian",
+    "iso1": "ka",
+    "iso3": "kat",
+    "scripts": [
+      "Georgian"
+    ]
+  },
+  {
+    "name": "German",
+    "iso1": "de",
+    "iso3": "deu",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Greek",
+    "iso1": "el",
+    "iso3": "ell",
+    "scripts": [
+      "Greek"
+    ]
+  },
+  {
+    "name": "Gujarati",
+    "iso1": "gu",
+    "iso3": "guj",
+    "scripts": [
+      "Gujarati"
+    ]
+  },
+  {
+    "name": "Hebrew",
+    "iso1": "he",
+    "iso3": "heb",
+    "scripts": [
+      "Hebrew"
+    ]
+  },
+  {
+    "name": "Hindi",
+    "iso1": "hi",
+    "iso3": "hin",
+    "scripts": [
+      "Devanagari"
+    ]
+  },
+  {
+    "name": "Hungarian",
+    "iso1": "hu",
+    "iso3": "hun",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Icelandic",
+    "iso1": "is",
+    "iso3": "isl",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Indonesian",
+    "iso1": "id",
+    "iso3": "ind",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Irish",
+    "iso1": "ga",
+    "iso3": "gle",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Italian",
+    "iso1": "it",
+    "iso3": "ita",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Japanese",
+    "iso1": "ja",
+    "iso3": "jpn",
+    "scripts": [
+      "Hiragana",
+      "Katakana",
+      "Han"
+    ]
+  },
+  {
+    "name": "Kazakh",
+    "iso1": "kk",
+    "iso3": "kaz",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Korean",
+    "iso1": "ko",
+    "iso3": "kor",
+    "scripts": [
+      "Hangul"
+    ]
+  },
+  {
+    "name": "Latin",
+    "iso1": "la",
+    "iso3": "lat",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Latvian",
+    "iso1": "lv",
+    "iso3": "lav",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Lithuanian",
+    "iso1": "lt",
+    "iso3": "lit",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Macedonian",
+    "iso1": "mk",
+    "iso3": "mkd",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Malay",
+    "iso1": "ms",
+    "iso3": "msa",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Maori",
+    "iso1": "mi",
+    "iso3": "mri",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Marathi",
+    "iso1": "mr",
+    "iso3": "mar",
+    "scripts": [
+      "Devanagari"
+    ]
+  },
+  {
+    "name": "Mongolian",
+    "iso1": "mn",
+    "iso3": "mon",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Nynorsk",
+    "iso1": "nn",
+    "iso3": "nno",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Persian",
+    "iso1": "fa",
+    "iso3": "fas",
+    "scripts": [
+      "Arabic"
+    ]
+  },
+  {
+    "name": "Polish",
+    "iso1": "pl",
+    "iso3": "pol",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Portuguese",
+    "iso1": "pt",
+    "iso3": "por",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Punjabi",
+    "iso1": "pa",
+    "iso3": "pan",
+    "scripts": [
+      "Gurmukhi"
+    ]
+  },
+  {
+    "name": "Romanian",
+    "iso1": "ro",
+    "iso3": "ron",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Russian",
+    "iso1": "ru",
+    "iso3": "rus",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Serbian",
+    "iso1": "sr",
+    "iso3": "srp",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Shona",
+    "iso1": "sn",
+    "iso3": "sna",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Slovak",
+    "iso1": "sk",
+    "iso3": "slk",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Slovene",
+    "iso1": "sl",
+    "iso3": "slv",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Somali",
+    "iso1": "so",
+    "iso3": "som",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Sotho",
+    "iso1": "st",
+    "iso3": "sot",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Spanish",
+    "iso1": "es",
+    "iso3": "spa",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Swahili",
+    "iso1": "sw",
+    "iso3": "swa",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Swedish",
+    "iso1": "sv",
+    "iso3": "swe",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Tagalog",
+    "iso1": "tl",
+    "iso3": "tgl",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Tamil",
+    "iso1": "ta",
+    "iso3": "tam",
+    "scripts": [
+      "Tamil"
+    ]
+  },
+  {
+    "name": "Telugu",
+    "iso1": "te",
+    "iso3": "tel",
+    "scripts": [
+      "Telugu"
+    ]
+  },
+  {
+    "name": "Thai",
+    "iso1": "th",
+    "iso3": "tha",
+    "scripts": [
+      "Thai"
+    ]
+  },
+  {
+    "name": "Tsonga",
+    "iso1": "ts",
+    "iso3": "tso",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Tswana",
+    "iso1": "tn",
+    "iso3": "tsn",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Turkish",
+    "iso1": "tr",
+    "iso3": "tur",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Ukrainian",
+    "iso1": "uk",
+    "iso3": "ukr",
+    "scripts": [
+      "Cyrillic"
+    ]
+  },
+  {
+    "name": "Urdu",
+    "iso1": "ur",
+    "iso3": "urd",
+    "scripts": [
+      "Arabic"
+    ]
+  },
+  {
+    "name": "Vietnamese",
+    "iso1": "vi",
+    "iso3": "vie",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Welsh",
+    "iso1": "cy",
+    "iso3": "cym",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Xhosa",
+    "iso1": "xh",
+    "iso3": "xho",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Yoruba",
+    "iso1": "yo",
+    "iso3": "yor",
+    "scripts": [
+      "Latin"
+    ]
+  },
+  {
+    "name": "Zulu",
+    "iso1": "zu",
+    "iso3": "zul",
+    "scripts": [
+      "Latin"
+    ]
+  }
+]

@@ -23,16 +23,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zhangke.lingua.LinguaNative
+import com.zhangke.lingua.LanguageDetectorBuilder
+import androidx.compose.runtime.DisposableEffect
 import com.zhangke.lingua.demo.ui.theme.LinguakmpTheme
-import java.util.Locale
-import kotlin.time.DurationUnit
-import kotlin.time.measureTimedValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
+import kotlin.time.DurationUnit
+import kotlin.time.measureTimedValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +44,7 @@ class MainActivity : ComponentActivity() {
             LinguakmpTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     DetectionScreen(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
                     )
                 }
             }
@@ -57,6 +59,13 @@ private fun DetectionScreen(modifier: Modifier = Modifier) {
     var elapsedMillis by rememberSaveable { mutableStateOf<Double?>(null) }
     var isDetecting by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val isPreview = LocalInspectionMode.current
+    val detector = remember(isPreview) {
+        if (isPreview) null else LanguageDetectorBuilder.fromAllLanguages().build()
+    }
+    DisposableEffect(detector) {
+        onDispose { detector?.close() }
+    }
 
     Column(
         modifier = modifier
@@ -74,7 +83,7 @@ private fun DetectionScreen(modifier: Modifier = Modifier) {
             minLines = 3,
         )
         Button(
-            enabled = !isDetecting,
+            enabled = !isDetecting && detector != null,
             onClick = {
                 val text = input
                 isDetecting = true
@@ -83,7 +92,9 @@ private fun DetectionScreen(modifier: Modifier = Modifier) {
                 scope.launch {
                     try {
                         val detection = withContext(Dispatchers.Default) {
-                            measureTimedValue { LinguaNative.detect(text) }
+                            measureTimedValue {
+                                checkNotNull(detector).detectLanguageOf(text)?.isoCode6391?.code
+                            }
                         }
                         result = detection.value.toString()
                         elapsedMillis = detection.duration.toDouble(DurationUnit.MILLISECONDS)
