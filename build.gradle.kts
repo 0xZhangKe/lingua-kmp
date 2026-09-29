@@ -1,11 +1,10 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.plugins.signing.SigningExtension
 
 plugins {
+    alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.android.library) apply false
-    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.publish) apply false
 }
@@ -16,7 +15,7 @@ allprojects {
 
     plugins.withId("com.vanniktech.maven.publish.base") {
         extensions.configure<MavenPublishBaseExtension>("mavenPublishing") {
-            publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+            publishToMavenCentral(automaticRelease = true)
             val hasInMemorySigningKey = providers.gradleProperty("signingInMemoryKey").isPresent
             val hasFileSigningKey = providers.gradleProperty("signing.keyId").isPresent &&
                 providers.gradleProperty("signing.password").isPresent &&

@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 rootProject.name = "lingua-kmp"
 
 include(":lingua-core")
+include(":demo")

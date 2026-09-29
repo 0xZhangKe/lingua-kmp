@@ -9,3 +9,7 @@ captures/
 .konan/
 **/build/
 .DS_Store
+
+# Rust
+/native/target/
+/lingua-core/src/androidMain/jniLibs/
