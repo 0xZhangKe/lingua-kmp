@@ -6,6 +6,7 @@ package com.zhangke.lingua
  * Blocking and potentially memory-intensive; run off the UI thread.
  */
 public object LanguageModelFilesWriter {
+    @Throws(IllegalArgumentException::class, IllegalStateException::class)
     public fun createAndWriteLanguageModelFiles(
         inputFilePath: String,
         outputDirectoryPath: String,
@@ -19,6 +20,7 @@ public object LanguageModelFilesWriter {
  * maximumLines must be in 1..input line count: other values hang in upstream 1.8.0 and are rejected.
  */
 public object TestDataFilesWriter {
+    @Throws(IllegalArgumentException::class, IllegalStateException::class)
     public fun createAndWriteTestDataFiles(
         inputFilePath: String,
         outputDirectoryPath: String,
@@ -31,6 +33,7 @@ public object TestDataFilesWriter {
  * Paths, overwriting and errors follow [LanguageModelFilesWriter].
  */
 public object UniqueNgramsWriter {
+    @Throws(IllegalArgumentException::class, IllegalStateException::class)
     public fun createAndWriteUniqueNgramFiles(outputDirectoryPath: String): Unit =
         writeUniqueNgramFiles(outputDirectoryPath)
 }
@@ -39,6 +42,7 @@ public object UniqueNgramsWriter {
  * Paths, overwriting and errors follow [LanguageModelFilesWriter].
  */
 public object MostCommonNgramsWriter {
+    @Throws(IllegalArgumentException::class, IllegalStateException::class)
     public fun createAndWriteMostCommonNgramFiles(
         outputDirectoryPath: String,
         languages: Set<Language>,

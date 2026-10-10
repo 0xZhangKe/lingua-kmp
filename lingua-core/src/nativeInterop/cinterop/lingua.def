@@ -1,0 +1,4 @@
+headers = lingua.h
+headerFilter = lingua.h
+package = com.zhangke.lingua.cinterop
+staticLibraries = liblingua_kmp.a

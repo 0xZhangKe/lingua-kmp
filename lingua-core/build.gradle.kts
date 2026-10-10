@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
@@ -17,8 +19,47 @@ kotlin {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
         }
     }
-    iosArm64()
-    iosSimulatorArm64()
+    val xcframework = XCFramework("LinguaCore")
+    listOf(iosArm64() to "aarch64-apple-ios", iosSimulatorArm64() to "aarch64-apple-ios-sim").forEach { (target, rustTarget) ->
+        val rustOutput = layout.buildDirectory.dir("rust/$rustTarget")
+        val buildRust = tasks.register<Exec>("buildRust${target.name.replaceFirstChar(Char::uppercaseChar)}") {
+            workingDir(rootProject.file("native"))
+            executable = providers.environmentVariable("CARGO_HOME")
+                .map { "$it/bin/cargo" }.getOrElse("${System.getProperty("user.home")}/.cargo/bin/cargo")
+            args("build", "--release", "--locked", "--lib", "--target", rustTarget,
+                "--target-dir", rustOutput.get().asFile.absolutePath)
+            inputs.dir(rootProject.file("native/src"))
+            inputs.file(rootProject.file("native/Cargo.toml"))
+            inputs.file(rootProject.file("native/Cargo.lock"))
+            outputs.file(rustOutput.map { it.file("$rustTarget/release/liblingua_kmp.a") })
+            doFirst {
+                check(System.getProperty("os.name").contains("Mac")) { "iOS native builds require macOS with Xcode installed" }
+                val sdk = if (rustTarget.endsWith("-sim")) "iphonesimulator" else "iphoneos"
+                val sdkPath = providers.exec {
+                    commandLine("/usr/bin/xcrun", "--sdk", sdk, "--show-sdk-path")
+                    isIgnoreExitValue = true
+                }
+                check(sdkPath.result.get().exitValue == 0) { "Missing $sdk SDK. Install full Xcode and select it with xcode-select." }
+                environment("SDKROOT", sdkPath.standardOutput.asText.get().trim())
+                environment("IPHONEOS_DEPLOYMENT_TARGET", "15.0")
+            }
+        }
+        val interop = target.compilations.getByName("main").cinterops.create("lingua") {
+            definitionFile.set(project.file("src/nativeInterop/cinterop/lingua.def"))
+            includeDirs(rootProject.file("native/include"))
+            extraOpts("-libraryPath", rustOutput.get().dir("$rustTarget/release").asFile.absolutePath)
+        }
+        tasks.named(interop.interopProcessingTaskName) {
+            dependsOn(buildRust)
+            inputs.file(rustOutput.map { it.file("$rustTarget/release/liblingua_kmp.a") })
+            inputs.file(rootProject.file("native/include/lingua.h"))
+        }
+        target.binaries.framework {
+            baseName = "LinguaCore"
+            isStatic = true
+            xcframework.add(this)
+        }
+    }
     jvm("desktop")
 
     sourceSets {
@@ -88,8 +129,8 @@ tasks.named("clean") {
     }
 }
 
-// A Command Line Tools-only macOS host can compile KLIBs but cannot link/run iOS tests.
-// Keep common tests running on Desktop and enable the iOS run whenever its SDK is installed.
+// Test execution requires an installed iOS Simulator SDK. Native compilation also
+// requires full Xcode; the Rust build task reports missing SDKs explicitly.
 val hasIosSimulatorSdk = providers.provider {
     System.getProperty("os.name").contains("Mac", ignoreCase = true) &&
         providers.exec {

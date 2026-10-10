@@ -1,7 +1,8 @@
 # lingua-kmp
 
 Kotlin Multiplatform bindings for **lingua-rs 1.8.0** (75 languages). Android uses
-JNI and the original Rust models. No Java language-detection implementation is used.
+JNI; iOS uses Kotlin/Native cinterop and a Rust static library. Both use the
+original Rust models. No Java language-detection implementation is used.
 
 ```kotlin
 import com.zhangke.lingua.*
@@ -23,7 +24,8 @@ try {
 
 `LanguageDetector` implements `AutoCloseable`, so `build().use { detector -> … }`
 is also supported. Keep a detector for repeated calls. Operations block; run them
-off the Android main thread. The demo keeps one detector for its screen lifetime.
+off the main thread on Android and iOS. The Android demo provides an executable
+example for every detector method, using a separate detector for each example.
 
 ## API
 
@@ -48,11 +50,11 @@ model unloading, and upstream's four file-generation tools.
 
 ## Ownership, concurrency and errors
 
-Android serializes calls and `close()` per detector. Parallel batch operations
+Android and iOS serialize calls and `close()` per detector. Parallel batch operations
 still use native worker threads; separate detector instances may run concurrently.
 `close()` is idempotent and every operation after close throws
-`IllegalStateException`. A phantom-reference daemon is a fallback for forgotten
-close calls; deterministic `close`/`use` remains preferable.
+`IllegalStateException`. Android uses a phantom-reference daemon and iOS uses a Kotlin/Native cleaner
+as fallbacks for forgotten close calls; deterministic `close`/`use` remains preferable.
 
 The Rust registry stores `Arc<Detector>` behind opaque, monotonically increasing
 IDs; IDs are never raw pointers or reused. An in-flight operation retains an Arc
@@ -82,14 +84,25 @@ for all 75 languages is an offline, memory-intensive operation.
 ## Platforms and bridge
 
 - **Android:** JNI implementation, arm64-v8a and x86_64, minSdk 23.
-- **iOS Arm64 / iOS Simulator Arm64 / Desktop JVM:** common models and builder
-  validation compile; `build()` and file-writer execution throw
-  `UnsupportedOperationException`. No alternate detection engine is substituted.
+- **iOS Arm64 / iOS Simulator Arm64:** C ABI and Kotlin/Native cinterop, all detector
+  and file-writer operations implemented. Builds require full Xcode; the current
+  Kotlin/Native configuration targets iOS 15 or later.
+- **Desktop JVM:** common models and builder validation compile; `build()` and
+  file-writer execution throw `UnsupportedOperationException`.
 
 `native/src/core.rs`, `language.rs` and `writers.rs` are platform-independent.
-`jni_bridge.rs` handles JNI conversion and exceptions only. Future C ABI exports
-can reuse the same core, registry, mapping and result conversion; no speculative
-cinterop/XCFramework implementation is included.
+`jni_bridge.rs` handles JNI conversion and exceptions only. `c_bridge.rs` exposes
+that same core through the C interface in `native/include/lingua.h`. iOS builds
+exclude JNI and use `src/iosMain` to implement the common Kotlin API.
+
+The C ABI borrows length-delimited UTF-16 strings for each call, preserving NULs
+and rejecting malformed surrogates. Every operation returns an owned opaque result;
+Kotlin copies its contents and releases it in `finally`. Confidence and segment
+rows follow the existing wire mapping, with integers represented exactly as doubles.
+Handles remain separate 64-bit integers. Rust errors and unwinding panics cannot
+cross the C boundary: argument errors become `IllegalArgumentException`, while
+state, panic, and fallible allocation errors become `IllegalStateException` on iOS.
+An allocator abort remains unrecoverable.
 
 The private wire ID packs the two lowercase ISO 639-1 ASCII bytes as
 `(first << 8) | second`; zero means no detected language. It does not depend on
@@ -130,3 +143,36 @@ Upstream 1.8.0 limitation: `TestDataFilesWriter` never terminates when
 `maximumLines` is zero or exceeds the input line count. The bridge deliberately
 rejects those values with `IllegalArgumentException` before writing. This is a
 safety correction to an upstream edge case, not an alternative writer algorithm.
+
+### iOS
+
+Install full Xcode and select its developer directory. Install the Rust targets:
+
+```sh
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+./gradlew :lingua-core:compileKotlinIosArm64 :lingua-core:compileKotlinIosSimulatorArm64
+./gradlew :lingua-core:iosSimulatorArm64Test
+./gradlew :lingua-core:assembleLinguaCoreReleaseXCFramework
+```
+
+Gradle builds the Rust static library separately for each target before cinterop,
+then embeds it in the generated interop KLIB. KMP consumers therefore link the Rust
+library automatically; they do not need to install Cargo to consume a published KLIB.
+For Swift consumers, the last command produces the static
+`lingua-core/build/XCFrameworks/release/LinguaCore.xcframework`.
+Explicitly close detectors from Swift when finished; expensive methods are synchronous.
+Detector, builder validation, and writer entry points declare `@Throws` so their
+expected Kotlin exceptions are exported as errors Swift can catch.
+
+The iOS tests cover all detector methods, parallel ordering, empty batches, confidence
+values, builder options, UTF-16 offsets including emoji, embedded NULs, invalid
+surrogates, close semantics, file generation, and native error/panic translation.
+Native C ABI tests also run with `cargo test` on the host without an iOS SDK.
+
+```swift
+import LinguaCore
+
+let detector = try LanguageDetectorBuilder.companion.fromAllLanguages().build()
+defer { detector.close() }
+let language = try detector.detectLanguageOf(text: "今日はいい天気ですね")
+```

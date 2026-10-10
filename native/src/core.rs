@@ -1,4 +1,4 @@
-//! Platform-independent detector ownership and result conversion, reusable by a future C ABI.
+//! Platform-independent detector ownership and result conversion, shared by JNI and the C ABI.
 use crate::language::{language_from_id, language_id};
 use lingua::{LanguageDetector, LanguageDetectorBuilder};
 use std::collections::HashMap;
