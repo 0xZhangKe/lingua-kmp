@@ -287,6 +287,14 @@ contains only the Android launcher, packaging/resources, and existing Android
 instrumentation tests. `demo` supplies its Android library target as well as the
 iOS ARM64, iOS Simulator ARM64, and desktop JVM targets.
 
+The demo consumes `io.github.0xzhangke:lingua-core:0.0.1` from Maven Central,
+with the version shared through `linguaCore` in `gradle/libs.versions.toml`.
+Desktop adds the published `lingua-core-desktop` native classifier matching
+the Gradle JVM's operating system and CPU architecture. Building or running the
+demo does not build the local `lingua-core` module or require Cargo/Rust targets;
+the published Android AAR and iOS KLIBs already include their native libraries.
+The selected desktop native classifier must exist in the published version.
+
 ```sh
 # Android APK / installation / existing instrumentation tests
 ./gradlew :demo:androidApp:assembleDebug
@@ -305,8 +313,8 @@ iOS ARM64, iOS Simulator ARM64, and desktop JVM targets.
 
 For iOS, open `demo/iosApp/LinguaDemo.xcodeproj` in Xcode and run the `LinguaDemo`
 scheme on an ARM64 simulator or device. Its build phase runs
-`:demo:embedAndSignAppleFrameworkForXcode` to build/link the shared UI and Rust
-library automatically. An iOS Simulator runtime is needed to launch on a simulator;
+`:demo:embedAndSignAppleFrameworkForXcode` to build/link the shared UI and published
+native library automatically. An iOS Simulator runtime is needed to launch on a simulator;
 set a signing team in Xcode to run on a physical device. Xcode's Gradle build phase
-needs JDK 21 and Cargo available (`JAVA_HOME`/`CARGO_HOME` can be set in your local
-Xcode environment). No CocoaPods setup is needed.
+needs JDK 21 available (`JAVA_HOME` can be set in your local Xcode environment).
+No CocoaPods setup is needed.

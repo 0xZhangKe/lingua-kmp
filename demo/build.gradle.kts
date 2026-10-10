@@ -7,6 +7,18 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val desktopOs = when {
+    System.getProperty("os.name").startsWith("Mac", ignoreCase = true) -> "macos"
+    System.getProperty("os.name").startsWith("Windows", ignoreCase = true) -> "windows"
+    System.getProperty("os.name").equals("Linux", ignoreCase = true) -> "linux"
+    else -> throw GradleException("Unsupported desktop OS: ${System.getProperty("os.name")}")
+}
+val desktopArch = when (System.getProperty("os.arch").lowercase()) {
+    "aarch64", "arm64" -> "aarch64"
+    "amd64", "x86_64", "x64" -> "x86_64"
+    else -> throw GradleException("Unsupported desktop architecture: ${System.getProperty("os.arch")}")
+}
+
 kotlin {
     android {
         namespace = "com.zhangke.lingua.demo.shared"
@@ -26,7 +38,7 @@ kotlin {
     }
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":lingua-core"))
+            implementation(libs.lingua.core)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)
             implementation(libs.compose.multiplatform.material3)
@@ -34,17 +46,13 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
         }
         commonTest.dependencies { implementation(kotlin("test")) }
-        getByName("desktopMain").dependencies { implementation(compose.desktop.currentOs) }
+        getByName("desktopMain").dependencies {
+            implementation(compose.desktop.currentOs)
+            runtimeOnly(project.dependencies.variantOf(libs.lingua.core.desktop) {
+                classifier("natives-$desktopOs-$desktopArch")
+            })
+        }
     }
-}
-
-// Local project dependencies use lingua-core's staged native resources. Packaged
-// desktop distributions also need the host native JAR on their runtime classpath.
-val desktopNatives = files(provider {
-    project(":lingua-core").tasks.named<Jar>("desktopNativesJar").get().archiveFile.get().asFile
-}).builtBy(":lingua-core:desktopNativesJar")
-kotlin.sourceSets.getByName("desktopMain").dependencies {
-    runtimeOnly(files(desktopNatives))
 }
 
 compose.desktop {

@@ -36,7 +36,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)
     testImplementation(libs.junit)
-    androidTestImplementation(project(":lingua-core"))
+    androidTestImplementation(libs.lingua.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.ext.junit)
