@@ -3,6 +3,7 @@ import org.gradle.plugins.signing.SigningExtension
 
 plugins {
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
@@ -21,9 +22,16 @@ allprojects {
                 providers.gradleProperty("signing.password").isPresent &&
                 providers.gradleProperty("signing.secretKeyRingFile").isPresent
             val hasGpgSigningKey = providers.gradleProperty("signing.gnupg.keyName").isPresent
-            check(hasInMemorySigningKey || hasFileSigningKey || hasGpgSigningKey) {
-                "Publishing requires signing. Configure signingInMemoryKey, signing.keyId/password/secretKeyRingFile, " +
-                    "or signing.gnupg.keyName before running publish tasks."
+            // Compiling and testing must work without publication credentials.
+            // Keep signing mandatory whenever a publication/signing task is executed.
+            gradle.taskGraph.whenReady {
+                if (allTasks.any { it.project == project &&
+                        (it.name.startsWith("publish") || it.name.startsWith("sign")) }) {
+                    check(hasInMemorySigningKey || hasFileSigningKey || hasGpgSigningKey) {
+                        "Publishing requires signing. Configure signingInMemoryKey, signing.keyId/password/secretKeyRingFile, " +
+                            "or signing.gnupg.keyName before running publish tasks."
+                    }
+                }
             }
             signAllPublications()
             if (hasGpgSigningKey) {

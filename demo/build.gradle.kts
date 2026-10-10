@@ -1,60 +1,54 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.compose)
 }
 
-android {
-    namespace = "com.zhangke.lingua.demo"
-    compileSdk {
-        version = release(37)
-    }
-
-    defaultConfig {
-        applicationId = "com.zhangke.lingua.demo"
+kotlin {
+    android {
+        namespace = "com.zhangke.lingua.demo.shared"
+        compileSdk = 37
         minSdk = 24
-        targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "LinguaDemo"
+            isStatic = true
+            binaryOption("bundleId", "com.zhangke.lingua.demo.shared")
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    jvm("desktop") {
+        compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
     }
-    buildFeatures {
-        compose = true
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":lingua-core"))
+            implementation(libs.compose.multiplatform.runtime)
+            implementation(libs.compose.multiplatform.foundation)
+            implementation(libs.compose.multiplatform.material3)
+            implementation(libs.compose.multiplatform.ui)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        commonTest.dependencies { implementation(kotlin("test")) }
+        getByName("desktopMain").dependencies { implementation(compose.desktop.currentOs) }
     }
 }
 
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-    }
+// Local project dependencies use lingua-core's staged native resources. Packaged
+// desktop distributions also need the host native JAR on their runtime classpath.
+val desktopNatives = files(provider {
+    project(":lingua-core").tasks.named<Jar>("desktopNativesJar").get().archiveFile.get().asFile
+}).builtBy(":lingua-core:desktopNativesJar")
+kotlin.sourceSets.getByName("desktopMain").dependencies {
+    runtimeOnly(files(desktopNatives))
 }
 
-dependencies {
-    implementation(project(":lingua-core"))
-    implementation(platform(libs.compose.bom))
-    implementation(libs.activity.compose)
-    implementation(libs.core.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.material3)
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.compose.bom))
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.ui.test.junit4)
-    debugImplementation(libs.ui.test.manifest)
-    debugImplementation(libs.ui.tooling)
+compose.desktop {
+    application {
+        mainClass = "com.zhangke.lingua.demo.MainKt"
+    }
 }

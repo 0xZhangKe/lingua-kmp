@@ -13,3 +13,7 @@ captures/
 # Rust
 /native/target/
 /lingua-core/src/androidMain/jniLibs/
+
+# Xcode user settings
+xcuserdata/
+*.xcuserstate

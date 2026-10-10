@@ -1,7 +1,7 @@
 # lingua-kmp
 
-Kotlin Multiplatform bindings for **lingua-rs 1.8.0** (75 languages). Android uses
-JNI; iOS uses Kotlin/Native cinterop and a Rust static library. Both use the
+Kotlin Multiplatform bindings for **lingua-rs 1.8.0** (75 languages). Android and Desktop JVM use
+JNI; iOS uses Kotlin/Native cinterop and a Rust static library. All use the
 original Rust models. No Java language-detection implementation is used.
 
 ```kotlin
@@ -24,8 +24,9 @@ try {
 
 `LanguageDetector` implements `AutoCloseable`, so `build().use { detector -> … }`
 is also supported. Keep a detector for repeated calls. Operations block; run them
-off the main thread on Android and iOS. The Android demo provides an executable
-example for every detector method, using a separate detector for each example.
+off the UI thread on Android, iOS, and desktop. The multiplatform demo provides an executable
+example for every detector method on Android, iOS, and desktop, using a separate
+detector for each example.
 
 ## API
 
@@ -50,10 +51,10 @@ model unloading, and upstream's four file-generation tools.
 
 ## Ownership, concurrency and errors
 
-Android and iOS serialize calls and `close()` per detector. Parallel batch operations
+Android, Desktop, and iOS serialize calls and `close()` per detector. Parallel batch operations
 still use native worker threads; separate detector instances may run concurrently.
 `close()` is idempotent and every operation after close throws
-`IllegalStateException`. Android uses a phantom-reference daemon and iOS uses a Kotlin/Native cleaner
+`IllegalStateException`. Android and Desktop use a phantom-reference daemon; iOS uses a Kotlin/Native cleaner
 as fallbacks for forgotten close calls; deterministic `close`/`use` remains preferable.
 
 The Rust registry stores `Arc<Detector>` behind opaque, monotonically increasing
@@ -87,11 +88,15 @@ for all 75 languages is an offline, memory-intensive operation.
 - **iOS Arm64 / iOS Simulator Arm64:** C ABI and Kotlin/Native cinterop, all detector
   and file-writer operations implemented. Builds require full Xcode; the current
   Kotlin/Native configuration targets iOS 15 or later.
-- **Desktop JVM:** common models and builder validation compile; `build()` and
-  file-writer execution throw `UnsupportedOperationException`.
+- **Desktop JVM:** JNI implements all detector and file-writer operations. macOS
+  ARM64 is verified locally. Build/loading supports macOS, Linux (GNU libc), and
+  Windows (MSVC), each with ARM64 and x86_64 native classifiers. A six-job CI
+  matrix builds and tests those classifiers on matching host architectures.
 
 `native/src/core.rs`, `language.rs` and `writers.rs` are platform-independent.
-`jni_bridge.rs` handles JNI conversion and exceptions only. `c_bridge.rs` exposes
+`jni_bridge.rs` handles JNI conversion and exceptions for Android and Desktop.
+`src/jvmSharedMain` shares JNI declarations, result decoding, file writers, and
+serialized ownership across both JVM platforms; platform source sets load the library. `c_bridge.rs` exposes
 that same core through the C interface in `native/include/lingua.h`. iOS builds
 exclude JNI and use `src/iosMain` to implement the common Kotlin API.
 
@@ -124,7 +129,7 @@ Prerequisites: JDK 21, Android SDK/NDK, Cargo, cargo-ndk, and the
 ```sh
 cargo test --manifest-path native/Cargo.toml --locked
 ./gradlew :lingua-core:build
-./gradlew :demo:connectedDebugAndroidTest
+./gradlew :demo:androidApp:connectedDebugAndroidTest
 ```
 
 `buildRustAndroid` keeps the existing `cargo ndk → jniLibs → AAR` chain and uses
@@ -176,3 +181,132 @@ let detector = try LanguageDetectorBuilder.companion.fromAllLanguages().build()
 defer { detector.close() }
 let language = try detector.detectLanguageOf(text: "今日はいい天気ですね")
 ```
+
+### Desktop JVM
+
+Development requires JDK 21, Cargo, the selected Rust target (`rustup target add
+<target>`), and the native platform linker: Xcode Command Line Tools on macOS,
+GCC on Linux, or Visual Studio C++ Build Tools with the selected architecture on
+Windows. The generated JVM classes target Java 11.
+Gradle compiles a Rust dynamic library for the current host and stages it as
+`natives/<os>-<arch>/<library>`. The loader extracts this classpath resource to a
+unique temporary directory and loads it once per class loader. Explicit `close`/`use`
+is recommended; a phantom-reference reaper provides a GC cleanup fallback.
+
+```sh
+./gradlew :lingua-core:desktopTest :lingua-core:desktopPackagedTest
+./gradlew :lingua-core:desktopJar :lingua-core:desktopNativesJar
+```
+
+For macOS ARM64, these produce two artifacts under `lingua-core/build/libs/`:
+
+- `lingua-core-desktop-0.0.1.jar`: portable JVM classes, without native binaries.
+- `lingua-core-desktop-0.0.1-natives-macos-aarch64.jar`: the host Rust/JNI library.
+
+Both artifacts are attached to the Desktop Maven publication. After publishing,
+JVM consumers include the classes and their platform's native classifier:
+
+```kotlin
+dependencies {
+    implementation("io.github.0xzhangke:lingua-core-desktop:0.0.1")
+    runtimeOnly("io.github.0xzhangke:lingua-core-desktop:0.0.1:natives-macos-aarch64")
+}
+```
+
+KMP consumers can keep the common dependency and add that native classifier to
+`desktopMain`. Runtime consumers need neither Cargo nor `java.library.path` setup.
+Other recognized classifiers are `natives-macos-x86_64`, `natives-linux-aarch64`,
+`natives-linux-x86_64`, `natives-windows-aarch64`, and `natives-windows-x86_64`.
+By default a build generates the host JVM architecture's classifier. Select another
+architecture on the same OS with `-Plingua.desktopArch=x86_64` or
+`-Plingua.desktopArch=aarch64`; `arm64`, `amd64`, and `x64` aliases are accepted.
+Install that Rust target and provide a cross linker when needed. Selecting an
+architecture does not change the operating system or install a linker.
+
+| OS | ARM64 Rust target | x86_64 Rust target |
+| --- | --- | --- |
+| macOS | `aarch64-apple-darwin` | `x86_64-apple-darwin` |
+| Linux (GNU libc) | `aarch64-unknown-linux-gnu` | `x86_64-unknown-linux-gnu` |
+| Windows (MSVC) | `aarch64-pc-windows-msvc` | `x86_64-pc-windows-msvc` |
+
+For example, build the Intel Mac native JAR on an Apple Silicon Mac:
+
+```sh
+rustup target add x86_64-apple-darwin
+./gradlew -Plingua.desktopOnly=true -Plingua.desktopArch=x86_64 \
+  :lingua-core:desktopNativesJar
+```
+
+`lingua.desktopOnly=true` excludes mobile targets and the Android demo so desktop
+builds do not require Android/iOS SDKs or publication signing credentials. Use the
+default configuration for publishing the full KMP library; signing is still required
+for publication and signing tasks. Each invocation attaches its selected classifier
+to the Desktop publication. CI artifacts are build outputs, not Maven releases;
+a release must collect the six classifiers under the same Maven version. Place the
+six native JARs in one directory, preserving their filenames, then set
+`-Plingua.desktopNativeArtifactsDir=/path/to/collected-jars` for publication.
+Gradle requires all six and attaches them to the Desktop Maven publication,
+replacing the default single-host classifier. Normal signing requirements apply.
+
+Tests must use a JVM matching the native library's architecture. On Apple Silicon,
+Intel tests require Rosetta and an x86_64 JDK/JRE; pass its home directory:
+
+```sh
+./gradlew -Plingua.desktopOnly=true -Plingua.desktopArch=x86_64 \
+  -Plingua.desktopJavaHome=/path/to/x86_64-jdk/Contents/Home \
+  :lingua-core:desktopTest :lingua-core:desktopPackagedTest
+```
+
+The [Desktop workflow](.github/workflows/desktop.yml) builds, runs the API/JAR/Rust
+tests, and uploads each native classifier separately on six matching runners. Runner
+labels follow [GitHub's supported runner matrix](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
+Linux artifacts built on Ubuntu 24.04 require a compatible GNU libc system; Alpine
+musl, 32-bit x86/ARM, and other architectures are not covered.
+
+`desktopTest` covers detection, all parallel operations, confidence, UTF-16 offsets,
+builder options, close/concurrency semantics, file generation, and native errors.
+`desktopPackagedTest` reruns the API tests using only packaged production JARs,
+checks that the native resource comes from a JAR, and uses a separate JVM to verify
+the missing-native-artifact error. Both macOS ARM64 and x86_64 (using an Intel JVM under Rosetta) have been exercised locally.
+Linux/Windows execution awaits the CI matrix running on those hosts.
+
+
+## Multiplatform demo
+
+`demo` uses Compose Multiplatform. The English test UI, inputs, results, theme,
+background execution, and examples for all ten `LanguageDetector` methods live
+in `demo/src/commonMain`. The entry points only host the shared `App()`:
+
+- Android: `demo/androidApp/src/main/kotlin/.../MainActivity.kt`.
+- iOS: `demo/src/iosMain/.../MainViewController.kt`, hosted by the SwiftUI app in
+  `demo/iosApp/LinguaDemo.xcodeproj`.
+- Desktop: `demo/src/desktopMain/.../main.kt`.
+
+AGP 9 requires a separate Android application module, so `:demo:androidApp`
+contains only the Android launcher, packaging/resources, and existing Android
+instrumentation tests. `demo` supplies its Android library target as well as the
+iOS ARM64, iOS Simulator ARM64, and desktop JVM targets.
+
+```sh
+# Android APK / installation / existing instrumentation tests
+./gradlew :demo:androidApp:assembleDebug
+./gradlew :demo:androidApp:installDebug
+./gradlew :demo:androidApp:connectedDebugAndroidTest
+
+# Desktop window (host native JAR is included automatically)
+./gradlew :demo:run
+
+# Execute all ten shared examples and formatting checks on Desktop
+./gradlew :demo:desktopTest
+
+# iOS framework compilation with full Xcode selected
+./gradlew :demo:linkDebugFrameworkIosSimulatorArm64
+```
+
+For iOS, open `demo/iosApp/LinguaDemo.xcodeproj` in Xcode and run the `LinguaDemo`
+scheme on an ARM64 simulator or device. Its build phase runs
+`:demo:embedAndSignAppleFrameworkForXcode` to build/link the shared UI and Rust
+library automatically. An iOS Simulator runtime is needed to launch on a simulator;
+set a signing team in Xcode to run on a physical device. Xcode's Gradle build phase
+needs JDK 21 and Cargo available (`JAVA_HOME`/`CARGO_HOME` can be set in your local
+Xcode environment). No CocoaPods setup is needed.

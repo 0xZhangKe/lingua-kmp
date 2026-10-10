@@ -90,7 +90,7 @@ These are also exported by upstream `lib.rs`, independently of detection:
 Rust `&Path` maps to an absolute path `String`, language sets remain typed, and
 `u32` counts map to `UInt`. Rust argument panics are prevented with validation;
 I/O errors use `IllegalStateException`. Unexpected panic is contained at the JNI and C ABI boundaries.
-Wasm-only exports and Python wrapper APIs are not part of this Android/iOS KMP binding.
+Wasm-only exports and Python wrapper APIs are not part of this Android/iOS/Desktop KMP binding.
 
 Upstream 1.8.0 limitation: `TestDataFilesWriter` never terminates when
 `maximumLines` is zero or exceeds the input line count. The bridge deliberately

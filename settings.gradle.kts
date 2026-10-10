@@ -19,4 +19,6 @@ dependencyResolutionManagement {
 rootProject.name = "lingua-kmp"
 
 include(":lingua-core")
-include(":demo")
+if (!providers.gradleProperty("lingua.desktopOnly").map(String::toBoolean).getOrElse(false)) {
+    include(":demo", ":demo:androidApp")
+}

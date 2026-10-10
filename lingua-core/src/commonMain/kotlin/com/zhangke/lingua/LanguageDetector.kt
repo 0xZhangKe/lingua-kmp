@@ -1,9 +1,9 @@
 package com.zhangke.lingua
 
-/** Owns a long-lived native detector. Android/iOS operations and close are serialized per instance.
+/** Owns a long-lived native detector. Android/Desktop/iOS operations and close are serialized per instance.
  * Batch methods still run in parallel inside Rust. Different instances may run concurrently.
  * close is idempotent; all other methods throw IllegalStateException after close.
- * Explicit close/use is recommended; Android/iOS also provide a GC cleanup fallback.
+ * Explicit close/use is recommended; Android/Desktop/iOS also provide a GC cleanup fallback.
  * Methods are blocking. Call expensive operations off the UI thread.
  */
 public class LanguageDetector internal constructor(
